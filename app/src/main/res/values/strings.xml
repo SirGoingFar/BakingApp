@@ -1,0 +1,17 @@
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name">Baking App</string>
+    <string name="ingredient_measurement"><xliff:g id="measure_number" example="3">%s</xliff:g> (<xliff:g id="content_quantity" example="Tin">%s</xliff:g>)</string>
+    <string name="step_label_text">Step <xliff:g id="step_id" example="1">%s</xliff:g>: <xliff:g id="step_desc" example="Fry plantain">%s</xliff:g></string>
+    <string name="singular_ingredient">Ingredient</string>
+    <string name="plural_ingredient">Ingredients</string>
+    <string name="select_from_the_left_pane">Select from the left pane</string>
+    <string name="ingredients">Ingredients</string>
+    <string name="video_unavailable">Video unavailable</string>
+    <string name="step_description_image">step description image</string>
+    <string name="step">Step <xliff:g id="step_id" example="1">%s</xliff:g></string>
+    <string name="image_unavailable">Image unavailable</string>
+    <string name="notification_text">Press play to hear the piece!</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="restart">Restart</string>
+</resources>
