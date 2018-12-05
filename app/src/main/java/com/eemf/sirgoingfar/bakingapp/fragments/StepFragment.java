@@ -15,7 +15,6 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
-import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -29,32 +28,23 @@ import com.eemf.sirgoingfar.bakingapp.utils.DataUtil;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.audio.AudioRendererEventListener;
-import com.google.android.exoplayer2.decoder.DecoderCounters;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.source.dash.DashChunkSource;
-import com.google.android.exoplayer2.source.dash.DashMediaSource;
-import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.PlayerView;
-import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
-import com.google.android.exoplayer2.video.VideoRendererEventListener;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -97,9 +87,9 @@ public class StepFragment extends BaseFragment {
     private SimpleExoPlayer mExoPlayer;
 
     private static MediaSessionCompat mMediaSession;
-    private PlaybackStateCompat.Builder mPlaybackStateBuilder;
     private NotificationManager mNotifManager;
-//    private ComponentListener listener;
+    private ComponentListener listener;
+    PlaybackStateCompat.Builder mPlaybackStateBuilder;
     private int currentWindow;
     private long playbackPosition;
     private boolean playWhenReady = true;
@@ -338,11 +328,9 @@ public class StepFragment extends BaseFragment {
         }
     }
 
-/*    private class ComponentListener implements ExoPlayer.EventListener,
-            VideoRendererEventListener, AudioRendererEventListener {
-
+    private class ComponentListener implements Player.EventListener {
         @Override
-        public void onTimelineChanged(Timeline timeline, Object manifest) {
+        public void onTimelineChanged(Timeline timeline, @Nullable Object manifest, int reason) {
 
         }
 
@@ -358,7 +346,7 @@ public class StepFragment extends BaseFragment {
 
         @Override
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-            if (playbackState == ExoPlayer.STATE_READY) {
+            if (playbackState == Player.STATE_READY) {
                 if (playWhenReady) {
                     mPlaybackStateBuilder.setState(
                             PlaybackStateCompat.STATE_PLAYING,
@@ -377,12 +365,21 @@ public class StepFragment extends BaseFragment {
         }
 
         @Override
+        public void onRepeatModeChanged(int repeatMode) {
+        }
+
+        @Override
+        public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+
+        }
+
+        @Override
         public void onPlayerError(ExoPlaybackException error) {
 
         }
 
         @Override
-        public void onPositionDiscontinuity() {
+        public void onPositionDiscontinuity(int reason) {
 
         }
 
@@ -392,68 +389,8 @@ public class StepFragment extends BaseFragment {
         }
 
         @Override
-        public void onAudioEnabled(DecoderCounters counters) {
+        public void onSeekProcessed() {
 
         }
-
-        @Override
-        public void onAudioSessionId(int audioSessionId) {
-
-        }
-
-        @Override
-        public void onAudioDecoderInitialized(String decoderName, long initializedTimestampMs, long initializationDurationMs) {
-
-        }
-
-        @Override
-        public void onAudioInputFormatChanged(Format format) {
-
-        }
-
-        @Override
-        public void onAudioTrackUnderrun(int bufferSize, long bufferSizeMs, long elapsedSinceLastFeedMs) {
-
-        }
-
-        @Override
-        public void onAudioDisabled(DecoderCounters counters) {
-
-        }
-
-        @Override
-        public void onVideoEnabled(DecoderCounters counters) {
-
-        }
-
-        @Override
-        public void onVideoDecoderInitialized(String decoderName, long initializedTimestampMs, long initializationDurationMs) {
-
-        }
-
-        @Override
-        public void onVideoInputFormatChanged(Format format) {
-
-        }
-
-        @Override
-        public void onDroppedFrames(int count, long elapsedMs) {
-
-        }
-
-        @Override
-        public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
-
-        }
-
-        @Override
-        public void onRenderedFirstFrame(Surface surface) {
-
-        }
-
-        @Override
-        public void onVideoDisabled(DecoderCounters counters) {
-
-        }
-    }*/
+    }
 }

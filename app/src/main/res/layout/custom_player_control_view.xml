@@ -4,13 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:layout_margin="@dimen/dimen_20dp">
+    android:layout_margin="@dimen/dimen_10dp"
+    android:layout_gravity="bottom">
 
     <ImageButton
         android:id="@+id/exo_rew"
         android:layout_width="0dp"
         android:layout_weight="1"
-        android:layout_height="@dimen/dimen_100dp"
+        android:layout_height="@dimen/dimen_60dp"
         android:background="@color/black_opacity_cc"
         style="@style/ExoMediaButton.Rewind"
         android:contentDescription="@string/rew_btn" />
@@ -19,7 +20,7 @@
         android:id="@+id/exo_play"
         android:layout_width="0dp"
         android:layout_weight="1"
-        android:layout_height="@dimen/dimen_100dp"
+        android:layout_height="@dimen/dimen_60dp"
         android:background="@color/black_opacity_cc"
         style="@style/ExoMediaButton.Play"
         android:contentDescription="@string/play_btn" />
@@ -28,7 +29,7 @@
         android:id="@+id/exo_pause"
         android:layout_width="0dp"
         android:layout_weight="1"
-        android:layout_height="@dimen/dimen_100dp"
+        android:layout_height="@dimen/dimen_60dp"
         android:background="@color/black_opacity_cc"
         style="@style/ExoMediaButton.Pause"
         android:contentDescription="@string/pause_btn" />
@@ -37,7 +38,7 @@
         android:id="@+id/exo_ffwd"
         android:layout_width="0dp"
         android:layout_weight="1"
-        android:layout_height="@dimen/dimen_100dp"
+        android:layout_height="@dimen/dimen_60dp"
         android:background="@color/black_opacity_cc"
         style="@style/ExoMediaButton.FastForward"
         android:contentDescription="@string/ffwd_btn" />
