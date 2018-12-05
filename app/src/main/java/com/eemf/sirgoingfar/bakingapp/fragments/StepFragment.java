@@ -37,6 +37,7 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.audio.AudioRendererEventListener;
 import com.google.android.exoplayer2.decoder.DecoderCounters;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashChunkSource;
@@ -46,9 +47,11 @@ import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultDataSource;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.VideoRendererEventListener;
@@ -67,7 +70,7 @@ public class StepFragment extends BaseFragment {
     private static final String MEAL_INDEX = "meal_index";
 
     @BindView(R.id.exo_player)
-    SimpleExoPlayerView mPlayerView;
+    PlayerView mPlayerView;
 
     @BindView(R.id.tv_video_empty_state)
     TextView videoEmptyState;
@@ -96,7 +99,7 @@ public class StepFragment extends BaseFragment {
     private static MediaSessionCompat mMediaSession;
     private PlaybackStateCompat.Builder mPlaybackStateBuilder;
     private NotificationManager mNotifManager;
-    private ComponentListener listener;
+//    private ComponentListener listener;
     private int currentWindow;
     private long playbackPosition;
     private boolean playWhenReady = true;
@@ -117,11 +120,11 @@ public class StepFragment extends BaseFragment {
         View view = inflater.inflate(R.layout.fragment_step, container, false);
         ButterKnife.bind(this, view);
 
-        if(savedInstanceState != null){
-            if(savedInstanceState.containsKey(MEAL_INDEX))
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(MEAL_INDEX))
                 mealIndex = savedInstanceState.getInt(MEAL_INDEX);
 
-            if(savedInstanceState.containsKey(STEP_NUMBER))
+            if (savedInstanceState.containsKey(STEP_NUMBER))
                 stepNumber = savedInstanceState.getInt(STEP_NUMBER);
         }
 
@@ -171,7 +174,7 @@ public class StepFragment extends BaseFragment {
             playbackPosition = mExoPlayer.getCurrentPosition();
             currentWindow = mExoPlayer.getCurrentWindowIndex();
             playWhenReady = mExoPlayer.getPlayWhenReady();
-            mExoPlayer.removeListener(listener);
+//            mExoPlayer.removeListener(listener);
             mExoPlayer.setVideoListener(null);
             mExoPlayer.setVideoDebugListener(null);
             mExoPlayer.setAudioDebugListener(null);
@@ -183,7 +186,7 @@ public class StepFragment extends BaseFragment {
     private void setupView() {
 
         //initialize Components
-        listener = new ComponentListener();
+//        listener = new ComponentListener();
         mNotifManager = (NotificationManager) fragmentActivity.getSystemService(NOTIFICATION_SERVICE);
 
         //set header text
@@ -244,9 +247,9 @@ public class StepFragment extends BaseFragment {
             );
 
             mPlayerView.setPlayer(mExoPlayer);
-            mExoPlayer.addListener(listener);
+            /*mExoPlayer.addListener(listener);
             mExoPlayer.setVideoDebugListener(listener);
-            mExoPlayer.setAudioDebugListener(listener);
+            mExoPlayer.setAudioDebugListener(listener);*/
             mExoPlayer.setPlayWhenReady(playWhenReady);
             mExoPlayer.seekTo(currentWindow, playbackPosition);
         }
@@ -255,13 +258,13 @@ public class StepFragment extends BaseFragment {
         mExoPlayer.prepare(mediaSource, true, false);
     }
 
-    private MediaSource buildMediaSource(Uri uri) {
+    private MediaSource buildMediaSource(@NonNull Uri uri) {
 
         String userAgent = Util.getUserAgent(fragmentActivity, "BakingApp");
 
-        DataSource.Factory dataSourceFactory = new DefaultHttpDataSourceFactory(userAgent, BANDWIDTH_METER);
-        DashChunkSource.Factory dashChunkSourceFactory = new DefaultDashChunkSource.Factory(dataSourceFactory);
-        return new DashMediaSource(uri, dataSourceFactory, dashChunkSourceFactory, null, null);
+        DefaultDataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(fragmentActivity, userAgent);
+
+        return new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(uri);
     }
 
     private boolean isVideoAvailable() {
@@ -335,7 +338,7 @@ public class StepFragment extends BaseFragment {
         }
     }
 
-    private class ComponentListener implements ExoPlayer.EventListener,
+/*    private class ComponentListener implements ExoPlayer.EventListener,
             VideoRendererEventListener, AudioRendererEventListener {
 
         @Override
@@ -452,5 +455,5 @@ public class StepFragment extends BaseFragment {
         public void onVideoDisabled(DecoderCounters counters) {
 
         }
-    }
+    }*/
 }

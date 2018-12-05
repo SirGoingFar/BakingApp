@@ -36,5 +36,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.5'
     compile "android.arch.persistence.room:runtime:1.1.1"
     implementation "de.hdodenhof:circleimageview:2.2.0"
-    compile 'com.google.android.exoplayer:exoplayer:r2.4.0'
+    implementation 'com.google.android.exoplayer:exoplayer-core:2.8.4'
+    implementation 'com.google.android.exoplayer:exoplayer-dash:2.8.4'
+    implementation 'com.google.android.exoplayer:exoplayer-ui:2.8.4'
 }
