@@ -4,15 +4,29 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <com.google.android.exoplayer2.ui.PlayerView
-        android:id="@+id/exo_player"
+    <RelativeLayout
+        android:id="@+id/rl_exo_player_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:fastforward_increment="1000"
-        app:rewind_increment="1000"
-        app:resize_mode="fill"
-        app:show_timeout="1500"
-        app:controller_layout_id="@layout/custom_player_control_view"/>
+        android:layout_height="match_parent">
+
+        <com.google.android.exoplayer2.ui.PlayerView
+            android:id="@+id/exo_player"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:fastforward_increment="1000"
+            app:rewind_increment="1000"
+            app:resize_mode="fill"
+            app:show_timeout="1500"
+            app:controller_layout_id="@layout/custom_player_control_view" />
+
+        <ProgressBar
+            android:id="@+id/pb_buffer"
+            android:layout_width="@dimen/dimen_50dp"
+            android:layout_height="@dimen/dimen_50dp"
+            android:layout_centerInParent="true"
+            style="@style/SmallProgress" />
+
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/tv_video_empty_state"

@@ -19,8 +19,8 @@ public class RecipeStepActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_step);
 
-        //initialize variables
-        if (getIntent().getBundleExtra(Constants.RECIPE_STEP_ACTIVITY_DATA_BUNDLE) != null)
+        //initialize variables - don't re-create if there's a configuration change
+        if (getIntent().getBundleExtra(Constants.RECIPE_STEP_ACTIVITY_DATA_BUNDLE) != null && savedInstanceState == null)
             setupView(getIntent().getBundleExtra(Constants.RECIPE_STEP_ACTIVITY_DATA_BUNDLE));
     }
 
@@ -33,18 +33,12 @@ public class RecipeStepActivity extends BaseActivity {
             mMealIndex = dataBundle.getInt(Constants.KEY_MEAL_INDEX);
 
         //invalid parameter check
-        if (mMealIndex < 0 || mItemPosition < 0)
+        if (mMealIndex < 0 || mItemPosition < 0) {
             finish();
-
-        //pop multiple fragment launched, if any
-        if (dataBundle.containsKey(Constants.KEY_CURRENT_FRAGMENT_NAME)) {
-            String currentFragmentTag = dataBundle.getString(Constants.KEY_CURRENT_FRAGMENT_NAME);
-
-            if (currentFragmentTag != null)
-                popBackStackTo(currentFragmentTag);
+            return;
         }
 
-        ///open appropriate screen
+        //open appropriate screen
         openAppropriateScreen(mMealIndex, mItemPosition);
     }
 
