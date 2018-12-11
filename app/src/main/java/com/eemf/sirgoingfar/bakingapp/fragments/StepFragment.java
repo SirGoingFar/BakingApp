@@ -183,6 +183,9 @@ public class StepFragment extends BaseFragment {
             mExoPlayer.removeListener(listener);
             mExoPlayer.release();
             mExoPlayer = null;
+
+            mNotifManager.cancelAll();
+            mMediaSession.setActive(false);
         }
     }
 
@@ -291,8 +294,6 @@ public class StepFragment extends BaseFragment {
     public void onDestroy() {
         super.onDestroy();
         releasePlayer();
-        mNotifManager.cancelAll();
-        mMediaSession.setActive(false);
     }
 
     private void showNotification(PlaybackStateCompat state) {
