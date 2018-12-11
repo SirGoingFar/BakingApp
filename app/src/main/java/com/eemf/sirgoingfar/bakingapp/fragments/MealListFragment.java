@@ -1,5 +1,6 @@
 package com.eemf.sirgoingfar.bakingapp.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.eemf.sirgoingfar.bakingapp.R;
+import com.eemf.sirgoingfar.bakingapp.activities.MealListActivity;
 import com.eemf.sirgoingfar.bakingapp.adapters.MealRecyclerViewAdapter;
 import com.eemf.sirgoingfar.bakingapp.customs.GridSpacingItemDecoration;
 import com.eemf.sirgoingfar.bakingapp.utils.ArchitectureUtil;
@@ -25,11 +27,21 @@ public class MealListFragment extends BaseFragment implements MealRecyclerViewAd
     @BindView(R.id.rv_meal_list)
     RecyclerView mealRecyclerView;
 
+    MealListActivity fragmentActivity;
+
     public static MealListFragment newInstance() {
         Bundle args = new Bundle();
         MealListFragment fragment = new MealListFragment();
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        if (context instanceof MealListActivity)
+            fragmentActivity = (MealListActivity) context;
     }
 
     @Override

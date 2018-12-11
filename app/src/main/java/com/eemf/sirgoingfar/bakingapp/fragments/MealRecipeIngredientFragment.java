@@ -37,7 +37,7 @@ public class MealRecipeIngredientFragment extends BaseFragment {
 
         fragmentActivity.showOrHideDetailView(true);
 
-        //Set ActionBAr Title to the name of the meal
+        //Set ActionBar Title to the name of the meal
         fragmentActivity.setActionBarTitle(DataUtil.getMealNameAt(fragmentActivity, mMealIndex));
     }
 

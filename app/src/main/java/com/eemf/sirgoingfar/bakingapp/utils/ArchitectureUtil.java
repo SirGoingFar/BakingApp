@@ -15,7 +15,6 @@ public class ArchitectureUtil {
         }
     }
 
-
     public static boolean isTablet(@NonNull Context context){
         final int TAB_MIN_SCREEN_WIDTH = 1280;
         int deviceWidth = context.getResources().getDisplayMetrics().widthPixels;

@@ -15,7 +15,6 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
-import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -23,35 +22,30 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.eemf.sirgoingfar.bakingapp.R;
-import com.eemf.sirgoingfar.bakingapp.activities.FragmentHostActivity;
+import com.eemf.sirgoingfar.bakingapp.activities.MealListActivity;
 import com.eemf.sirgoingfar.bakingapp.models.RecipeData;
+import com.eemf.sirgoingfar.bakingapp.utils.ArchitectureUtil;
 import com.eemf.sirgoingfar.bakingapp.utils.DataUtil;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.audio.AudioRendererEventListener;
-import com.google.android.exoplayer2.decoder.DecoderCounters;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.source.dash.DashChunkSource;
-import com.google.android.exoplayer2.source.dash.DashMediaSource;
-import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
-import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
+import com.google.android.exoplayer2.upstream.DefaultDataSource;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
-import com.google.android.exoplayer2.video.VideoRendererEventListener;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -67,7 +61,7 @@ public class StepFragment extends BaseFragment {
     private static final String MEAL_INDEX = "meal_index";
 
     @BindView(R.id.exo_player)
-    SimpleExoPlayerView mPlayerView;
+    PlayerView mPlayerView;
 
     @BindView(R.id.tv_video_empty_state)
     TextView videoEmptyState;
@@ -94,9 +88,9 @@ public class StepFragment extends BaseFragment {
     private SimpleExoPlayer mExoPlayer;
 
     private static MediaSessionCompat mMediaSession;
-    private PlaybackStateCompat.Builder mPlaybackStateBuilder;
     private NotificationManager mNotifManager;
     private ComponentListener listener;
+    PlaybackStateCompat.Builder mPlaybackStateBuilder;
     private int currentWindow;
     private long playbackPosition;
     private boolean playWhenReady = true;
@@ -117,11 +111,11 @@ public class StepFragment extends BaseFragment {
         View view = inflater.inflate(R.layout.fragment_step, container, false);
         ButterKnife.bind(this, view);
 
-        if(savedInstanceState != null){
-            if(savedInstanceState.containsKey(MEAL_INDEX))
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(MEAL_INDEX))
                 mealIndex = savedInstanceState.getInt(MEAL_INDEX);
 
-            if(savedInstanceState.containsKey(STEP_NUMBER))
+            if (savedInstanceState.containsKey(STEP_NUMBER))
                 stepNumber = savedInstanceState.getInt(STEP_NUMBER);
         }
 
@@ -171,7 +165,7 @@ public class StepFragment extends BaseFragment {
             playbackPosition = mExoPlayer.getCurrentPosition();
             currentWindow = mExoPlayer.getCurrentWindowIndex();
             playWhenReady = mExoPlayer.getPlayWhenReady();
-            mExoPlayer.removeListener(listener);
+//            mExoPlayer.removeListener(listener);
             mExoPlayer.setVideoListener(null);
             mExoPlayer.setVideoDebugListener(null);
             mExoPlayer.setAudioDebugListener(null);
@@ -183,7 +177,7 @@ public class StepFragment extends BaseFragment {
     private void setupView() {
 
         //initialize Components
-        listener = new ComponentListener();
+//        listener = new ComponentListener();
         mNotifManager = (NotificationManager) fragmentActivity.getSystemService(NOTIFICATION_SERVICE);
 
         //set header text
@@ -214,6 +208,10 @@ public class StepFragment extends BaseFragment {
         //set step instruction
         if (stepInstruction != null && !TextUtils.isEmpty(currentStep.getDescription()))
             stepInstruction.setText(currentStep.getDescription());
+
+        //show full screen for Phone
+        if (ArchitectureUtil.isPhoneRotated(fragmentActivity) && !ArchitectureUtil.isTablet(fragmentActivity))
+            showFullScreen();
     }
 
     private void initializeMediaSession() {
@@ -244,9 +242,9 @@ public class StepFragment extends BaseFragment {
             );
 
             mPlayerView.setPlayer(mExoPlayer);
-            mExoPlayer.addListener(listener);
+            /*mExoPlayer.addListener(listener);
             mExoPlayer.setVideoDebugListener(listener);
-            mExoPlayer.setAudioDebugListener(listener);
+            mExoPlayer.setAudioDebugListener(listener);*/
             mExoPlayer.setPlayWhenReady(playWhenReady);
             mExoPlayer.seekTo(currentWindow, playbackPosition);
         }
@@ -255,24 +253,37 @@ public class StepFragment extends BaseFragment {
         mExoPlayer.prepare(mediaSource, true, false);
     }
 
-    private MediaSource buildMediaSource(Uri uri) {
+    private MediaSource buildMediaSource(@NonNull Uri uri) {
 
         String userAgent = Util.getUserAgent(fragmentActivity, "BakingApp");
 
-        DataSource.Factory dataSourceFactory = new DefaultHttpDataSourceFactory(userAgent, BANDWIDTH_METER);
-        DashChunkSource.Factory dashChunkSourceFactory = new DefaultDashChunkSource.Factory(dataSourceFactory);
-        return new DashMediaSource(uri, dataSourceFactory, dashChunkSourceFactory, null, null);
+        DefaultDataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(fragmentActivity, userAgent);
+
+        return new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(uri);
     }
 
     private boolean isVideoAvailable() {
         return !TextUtils.isEmpty(currentStep.getVideoURL());
     }
 
+    private void showFullScreen() {
+        fragmentActivity.getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+        );
+    }
+
+    private void hideFullScreen() {
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mNotifManager.cancelAll();
-        mMediaSession.setActive(false);
+//        mNotifManager.cancelAll();
+//        mMediaSession.setActive(false);
     }
 
     private void showNotification(PlaybackStateCompat state) {
@@ -295,7 +306,7 @@ public class StepFragment extends BaseFragment {
                 MediaButtonReceiver.buildMediaButtonPendingIntent(fragmentActivity, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS));
 
         PendingIntent contentIntent = PendingIntent.getActivity(fragmentActivity, 0,
-                new Intent(fragmentActivity, FragmentHostActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+                new Intent(fragmentActivity, MealListActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
 
         android.support.v4.app.NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(fragmentActivity, CHANNEL_ID)
                 .setContentText(getString(R.string.notification_text))
@@ -335,11 +346,9 @@ public class StepFragment extends BaseFragment {
         }
     }
 
-    private class ComponentListener implements ExoPlayer.EventListener,
-            VideoRendererEventListener, AudioRendererEventListener {
-
+    private class ComponentListener implements Player.EventListener {
         @Override
-        public void onTimelineChanged(Timeline timeline, Object manifest) {
+        public void onTimelineChanged(Timeline timeline, @Nullable Object manifest, int reason) {
 
         }
 
@@ -355,7 +364,7 @@ public class StepFragment extends BaseFragment {
 
         @Override
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-            if (playbackState == ExoPlayer.STATE_READY) {
+            if (playbackState == Player.STATE_READY) {
                 if (playWhenReady) {
                     mPlaybackStateBuilder.setState(
                             PlaybackStateCompat.STATE_PLAYING,
@@ -374,12 +383,21 @@ public class StepFragment extends BaseFragment {
         }
 
         @Override
+        public void onRepeatModeChanged(int repeatMode) {
+        }
+
+        @Override
+        public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+
+        }
+
+        @Override
         public void onPlayerError(ExoPlaybackException error) {
 
         }
 
         @Override
-        public void onPositionDiscontinuity() {
+        public void onPositionDiscontinuity(int reason) {
 
         }
 
@@ -389,68 +407,18 @@ public class StepFragment extends BaseFragment {
         }
 
         @Override
-        public void onAudioEnabled(DecoderCounters counters) {
+        public void onSeekProcessed() {
 
         }
+    }
 
-        @Override
-        public void onAudioSessionId(int audioSessionId) {
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+    }
 
-        }
-
-        @Override
-        public void onAudioDecoderInitialized(String decoderName, long initializedTimestampMs, long initializationDurationMs) {
-
-        }
-
-        @Override
-        public void onAudioInputFormatChanged(Format format) {
-
-        }
-
-        @Override
-        public void onAudioTrackUnderrun(int bufferSize, long bufferSizeMs, long elapsedSinceLastFeedMs) {
-
-        }
-
-        @Override
-        public void onAudioDisabled(DecoderCounters counters) {
-
-        }
-
-        @Override
-        public void onVideoEnabled(DecoderCounters counters) {
-
-        }
-
-        @Override
-        public void onVideoDecoderInitialized(String decoderName, long initializedTimestampMs, long initializationDurationMs) {
-
-        }
-
-        @Override
-        public void onVideoInputFormatChanged(Format format) {
-
-        }
-
-        @Override
-        public void onDroppedFrames(int count, long elapsedMs) {
-
-        }
-
-        @Override
-        public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
-
-        }
-
-        @Override
-        public void onRenderedFirstFrame(Surface surface) {
-
-        }
-
-        @Override
-        public void onVideoDisabled(DecoderCounters counters) {
-
-        }
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
     }
 }
