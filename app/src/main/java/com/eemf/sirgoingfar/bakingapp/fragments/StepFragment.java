@@ -22,8 +22,9 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.eemf.sirgoingfar.bakingapp.R;
-import com.eemf.sirgoingfar.bakingapp.activities.FragmentHostActivity;
+import com.eemf.sirgoingfar.bakingapp.activities.MealListActivity;
 import com.eemf.sirgoingfar.bakingapp.models.RecipeData;
+import com.eemf.sirgoingfar.bakingapp.utils.ArchitectureUtil;
 import com.eemf.sirgoingfar.bakingapp.utils.DataUtil;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
@@ -207,6 +208,10 @@ public class StepFragment extends BaseFragment {
         //set step instruction
         if (stepInstruction != null && !TextUtils.isEmpty(currentStep.getDescription()))
             stepInstruction.setText(currentStep.getDescription());
+
+        //show full screen for Phone
+        if (ArchitectureUtil.isPhoneRotated(fragmentActivity) && !ArchitectureUtil.isTablet(fragmentActivity))
+            showFullScreen();
     }
 
     private void initializeMediaSession() {
@@ -261,11 +266,24 @@ public class StepFragment extends BaseFragment {
         return !TextUtils.isEmpty(currentStep.getVideoURL());
     }
 
+    private void showFullScreen() {
+        fragmentActivity.getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+        );
+    }
+
+    private void hideFullScreen() {
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mNotifManager.cancelAll();
-        mMediaSession.setActive(false);
+//        mNotifManager.cancelAll();
+//        mMediaSession.setActive(false);
     }
 
     private void showNotification(PlaybackStateCompat state) {
@@ -288,7 +306,7 @@ public class StepFragment extends BaseFragment {
                 MediaButtonReceiver.buildMediaButtonPendingIntent(fragmentActivity, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS));
 
         PendingIntent contentIntent = PendingIntent.getActivity(fragmentActivity, 0,
-                new Intent(fragmentActivity, FragmentHostActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+                new Intent(fragmentActivity, MealListActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
 
         android.support.v4.app.NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(fragmentActivity, CHANNEL_ID)
                 .setContentText(getString(R.string.notification_text))
@@ -392,5 +410,15 @@ public class StepFragment extends BaseFragment {
         public void onSeekProcessed() {
 
         }
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
     }
 }

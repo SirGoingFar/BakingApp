@@ -20,6 +20,8 @@ import java.util.List;
 
 public class DataUtil {
 
+    private final String DATA_URL = "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
+
     private static String parseRecipeData(@NonNull Context context) {
         InputStream is = context.getResources().openRawResource(R.raw.data_json_file);
         Writer writer = new StringWriter();

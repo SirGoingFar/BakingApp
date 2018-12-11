@@ -2,9 +2,13 @@ package com.eemf.sirgoingfar.bakingapp.activities;
 
 import android.arch.lifecycle.Lifecycle;
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
@@ -15,12 +19,14 @@ import java.util.List;
 
 public class BaseActivity extends AppCompatActivity {
 
+    private ActionBar actionBar;
     private Fragment currentFragment;
+    protected FragmentManager fragmentManager = getSupportFragmentManager();
 
     protected void startFragmentOnMasterView(Fragment fragment, boolean addToBackStack, boolean allowStateLoss) {
         if (fragment != null) {
             currentFragment = fragment;
-            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            FragmentTransaction ft = fragmentManager.beginTransaction();
             ft.replace(R.id.container_master, fragment, fragment.getClass().getName());
             if (addToBackStack) {
                 ft.addToBackStack(fragment.getClass().getName());
@@ -45,7 +51,7 @@ public class BaseActivity extends AppCompatActivity {
     protected void startFragmentOnDetailView(Fragment fragment, boolean addToBackStack, boolean allowStateLoss) {
         if (fragment != null) {
             currentFragment = fragment;
-            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            FragmentTransaction ft = fragmentManager.beginTransaction();
             ft.replace(R.id.container_detail, fragment, fragment.getClass().getName());
             if (addToBackStack) {
                 ft.addToBackStack(fragment.getClass().getName());
@@ -68,9 +74,9 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     public void closeFragment() {
-        if (getSupportFragmentManager().getBackStackEntryCount() > 0 && isActivityStarted()) {
+        if (fragmentManager.getBackStackEntryCount() > 0 && isActivityStarted()) {
             hideKeyboard();
-            getSupportFragmentManager().popBackStack();
+            fragmentManager.popBackStack();
         } else {
             hideKeyboard();
             finish();
@@ -78,7 +84,7 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     public Fragment getCurrentFragment() {
-        List<Fragment> fragments = getSupportFragmentManager().getFragments();
+        List<Fragment> fragments = fragmentManager.getFragments();
         if (fragments.isEmpty()) {
             return null;
         }
@@ -121,5 +127,48 @@ public class BaseActivity extends AppCompatActivity {
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             }
         }
+    }
+
+    public boolean isDetailViewAvailable() {
+        return findViewById(R.id.container_detail) != null;
+    }
+
+    public void showOrHideDetailView(boolean show) {
+
+        View detailView = findViewById(R.id.container_detail);
+
+        if (!isDetailViewAvailable())
+            return;
+
+        if (show)
+            detailView.setVisibility(View.VISIBLE);
+        else
+            detailView.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        if (fragmentManager == null)
+            return;
+
+        if (fragmentManager.getBackStackEntryCount() <= 1)
+            finish();
+        else
+            super.onBackPressed();
+    }
+
+    protected void popBackStackTo(@NonNull String fragmentName) {
+
+        if (TextUtils.isEmpty(fragmentName) || fragmentManager == null || fragmentManager.getBackStackEntryCount() == 0)
+            return;
+
+        fragmentManager.popBackStack(fragmentName, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+    }
+
+    public void setActionBarTitle(@NonNull String title) {
+
+        if (actionBar != null)
+            actionBar.setTitle(title);
     }
 }

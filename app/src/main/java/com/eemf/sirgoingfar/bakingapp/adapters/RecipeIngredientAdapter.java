@@ -1,6 +1,8 @@
 package com.eemf.sirgoingfar.bakingapp.adapters;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
@@ -11,10 +13,13 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.eemf.sirgoingfar.bakingapp.R;
-import com.eemf.sirgoingfar.bakingapp.activities.FragmentHostActivity;
+import com.eemf.sirgoingfar.bakingapp.activities.MealListActivity;
+import com.eemf.sirgoingfar.bakingapp.activities.RecipeStepActivity;
 import com.eemf.sirgoingfar.bakingapp.fragments.IngredientFragment;
 import com.eemf.sirgoingfar.bakingapp.fragments.StepFragment;
 import com.eemf.sirgoingfar.bakingapp.models.RecipeData;
+import com.eemf.sirgoingfar.bakingapp.utils.ArchitectureUtil;
+import com.eemf.sirgoingfar.bakingapp.utils.Constants;
 import com.eemf.sirgoingfar.bakingapp.utils.DataUtil;
 
 import java.util.ArrayList;
@@ -27,7 +32,7 @@ import butterknife.ButterKnife;
 public class RecipeIngredientAdapter extends RecyclerView.Adapter<RecipeIngredientAdapter.Holder> {
 
     private int mMealIndex;
-    private FragmentHostActivity mContext;
+    private MealListActivity mContext;
     private List<RecipeData.Ingredient> mIngredientList = new ArrayList<>();
     private List<RecipeData.Step> mStepList = new ArrayList<>();
 
@@ -36,8 +41,8 @@ public class RecipeIngredientAdapter extends RecyclerView.Adapter<RecipeIngredie
         if (clickedMealIndex < 0)
             return;
 
-        if (context instanceof FragmentHostActivity)
-            mContext = (FragmentHostActivity) context;
+        if (context instanceof MealListActivity)
+            mContext = (MealListActivity) context;
 
         mMealIndex = clickedMealIndex;
         mIngredientList = DataUtil.getIngredientList(context, clickedMealIndex);
@@ -99,27 +104,33 @@ public class RecipeIngredientAdapter extends RecyclerView.Adapter<RecipeIngredie
 
         private void openAppropriateFragment(int adapterPosition) {
 
+
             Fragment fragment;
 
-            if (adapterPosition == 0) {
-                //start Ingredient Fragment
-                fragment = IngredientFragment.newInstance(mMealIndex);
-                if(mContext.isDetailViewAvailable()) {
+            if (ArchitectureUtil.isTablet(mContext)) {
+
+                if (adapterPosition == 0) {
+                    //start Ingredient Fragment
+                    fragment = IngredientFragment.newInstance(mMealIndex);
+                    mContext.startFragmentOnDetailView(fragment, true);
+                } else {
+                    //start Step Fragment
+                    fragment = StepFragment.newInstance(mMealIndex, adapterPosition);
                     mContext.startFragmentOnDetailView(fragment, true);
                 }
-                else {
-                    mContext.startFragmentOnMasterView(fragment, true);
-                }
-            }else {
-                //start Step Fragment
-                fragment = StepFragment.newInstance(mMealIndex, adapterPosition);
-                if(mContext.isDetailViewAvailable()) {
-                    mContext.startFragmentOnDetailView(fragment, true);
-                }
-                else {
-                    mContext.startFragmentOnMasterView(fragment, true);
-                }
+
+            } else {
+                Bundle dataBundle = new Bundle();
+                dataBundle.putInt(Constants.KEY_MEAL_INDEX, mMealIndex);
+                dataBundle.putInt(Constants.KEY_CLICKED_ITEM_POSITION, adapterPosition);
+                dataBundle.putString(Constants.KEY_CURRENT_FRAGMENT_NAME, adapterPosition == 0 ?
+                        IngredientFragment.class.getName() : StepFragment.class.getName());
+
+                Intent stepActivityIntent = new Intent(mContext, RecipeStepActivity.class);
+                stepActivityIntent.putExtra(Constants.RECIPE_STEP_ACTIVITY_DATA_BUNDLE, dataBundle);
+                mContext.startActivity(stepActivityIntent);
             }
+
         }
     }
 }

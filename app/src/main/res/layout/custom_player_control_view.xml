@@ -1,45 +1,29 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/controlsLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:background="@color/black_opacity_cc"
+    android:gravity="center"
     android:orientation="horizontal"
-    android:layout_margin="@dimen/dimen_10dp"
-    android:layout_gravity="bottom">
+    app:layout_constraintBottom_toBottomOf="parent">
 
     <ImageButton
-        android:id="@+id/exo_rew"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="@dimen/dimen_60dp"
-        android:background="@color/black_opacity_cc"
-        style="@style/ExoMediaButton.Rewind"
-        android:contentDescription="@string/rew_btn" />
+        android:id="@id/exo_rew"
+        style="@style/ExoMediaButton.Rewind" />
 
     <ImageButton
-        android:id="@+id/exo_play"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="@dimen/dimen_60dp"
-        android:background="@color/black_opacity_cc"
-        style="@style/ExoMediaButton.Play"
-        android:contentDescription="@string/play_btn" />
+        android:id="@id/exo_play"
+        style="@style/ExoMediaButton.Play" />
 
     <ImageButton
-        android:id="@+id/exo_pause"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="@dimen/dimen_60dp"
-        android:background="@color/black_opacity_cc"
-        style="@style/ExoMediaButton.Pause"
-        android:contentDescription="@string/pause_btn" />
+        android:id="@id/exo_pause"
+        style="@style/ExoMediaButton.Pause" />
 
     <ImageButton
-        android:id="@+id/exo_ffwd"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="@dimen/dimen_60dp"
-        android:background="@color/black_opacity_cc"
-        style="@style/ExoMediaButton.FastForward"
-        android:contentDescription="@string/ffwd_btn" />
+        android:id="@id/exo_ffwd"
+        style="@style/ExoMediaButton.FastForward" />
+
+
 </LinearLayout>
