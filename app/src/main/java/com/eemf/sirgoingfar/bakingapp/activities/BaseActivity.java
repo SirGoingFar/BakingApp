@@ -168,7 +168,9 @@ public class BaseActivity extends AppCompatActivity {
 
     public void setActionBarTitle(@NonNull String title) {
 
-        if (actionBar != null)
+        if (actionBar == null)
+            actionBar = getSupportActionBar();
+
             actionBar.setTitle(title);
     }
 }

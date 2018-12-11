@@ -14,6 +14,8 @@
     <string name="play">Play</string>
     <string name="pause">Pause</string>
     <string name="restart">Restart</string>
+    <string name="rewind">Rewind</string>
+    <string name="fastforward">Fast Forward</string>
     <string name="rew_btn">rew_btn</string>
     <string name="play_btn">play_btn</string>
     <string name="pause_btn">pause_btn</string>

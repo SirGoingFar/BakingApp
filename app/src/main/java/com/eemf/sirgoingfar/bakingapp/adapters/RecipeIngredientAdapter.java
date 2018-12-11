@@ -123,9 +123,7 @@ public class RecipeIngredientAdapter extends RecyclerView.Adapter<RecipeIngredie
                 Bundle dataBundle = new Bundle();
                 dataBundle.putInt(Constants.KEY_MEAL_INDEX, mMealIndex);
                 dataBundle.putInt(Constants.KEY_CLICKED_ITEM_POSITION, adapterPosition);
-                dataBundle.putString(Constants.KEY_CURRENT_FRAGMENT_NAME, adapterPosition == 0 ?
-                        IngredientFragment.class.getName() : StepFragment.class.getName());
-
+                
                 Intent stepActivityIntent = new Intent(mContext, RecipeStepActivity.class);
                 stepActivityIntent.putExtra(Constants.RECIPE_STEP_ACTIVITY_DATA_BUNDLE, dataBundle);
                 mContext.startActivity(stepActivityIntent);

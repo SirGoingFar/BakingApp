@@ -18,6 +18,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -25,6 +27,7 @@ import com.eemf.sirgoingfar.bakingapp.R;
 import com.eemf.sirgoingfar.bakingapp.activities.MealListActivity;
 import com.eemf.sirgoingfar.bakingapp.models.RecipeData;
 import com.eemf.sirgoingfar.bakingapp.utils.ArchitectureUtil;
+import com.eemf.sirgoingfar.bakingapp.utils.Constants;
 import com.eemf.sirgoingfar.bakingapp.utils.DataUtil;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
@@ -51,14 +54,14 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
+import static com.eemf.sirgoingfar.bakingapp.utils.Constants.MEAL_INDEX;
+import static com.eemf.sirgoingfar.bakingapp.utils.Constants.STEP_NUMBER;
 
 public class StepFragment extends BaseFragment {
 
     private static final String TAG = StepFragment.class.getSimpleName();
     private static final String CHANNEL_ID = "notif_channel_id";
     private static final DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
-    private static final String STEP_NUMBER = "step_number";
-    private static final String MEAL_INDEX = "meal_index";
 
     @BindView(R.id.exo_player)
     PlayerView mPlayerView;
@@ -81,6 +84,12 @@ public class StepFragment extends BaseFragment {
     @Nullable
     @BindView(R.id.tv_step_instruction)
     TextView stepInstruction;
+
+    @BindView(R.id.rl_exo_player_layout)
+    RelativeLayout playerLayout;
+
+    @BindView(R.id.pb_buffer)
+    ProgressBar bufferLoader;
 
     private int mealIndex;
     private int stepNumber;
@@ -117,6 +126,11 @@ public class StepFragment extends BaseFragment {
 
             if (savedInstanceState.containsKey(STEP_NUMBER))
                 stepNumber = savedInstanceState.getInt(STEP_NUMBER);
+
+            if (savedInstanceState.containsKey(Constants.KEY_PLAYBACK_POSITION))
+                playbackPosition = savedInstanceState.getLong(Constants.KEY_PLAYBACK_POSITION);
+            else
+                playbackPosition = 0L;
         }
 
         currentStep = DataUtil.getStepAt(fragmentActivity, mealIndex, (stepNumber - 1));
@@ -135,7 +149,7 @@ public class StepFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if ((Util.SDK_INT <= 23 || mExoPlayer == null) && isVideoAvailable())
+        if ((Util.SDK_INT <= 23) && isVideoAvailable())
             initializePlayer();
     }
 
@@ -156,8 +170,9 @@ public class StepFragment extends BaseFragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(MEAL_INDEX, mealIndex);
-        outState.putInt(STEP_NUMBER, stepNumber);
+        outState.putInt(Constants.MEAL_INDEX, mealIndex);
+        outState.putInt(Constants.STEP_NUMBER, stepNumber);
+        outState.putLong(Constants.KEY_PLAYBACK_POSITION, playbackPosition);
     }
 
     private void releasePlayer() {
@@ -165,19 +180,19 @@ public class StepFragment extends BaseFragment {
             playbackPosition = mExoPlayer.getCurrentPosition();
             currentWindow = mExoPlayer.getCurrentWindowIndex();
             playWhenReady = mExoPlayer.getPlayWhenReady();
-//            mExoPlayer.removeListener(listener);
-            mExoPlayer.setVideoListener(null);
-            mExoPlayer.setVideoDebugListener(null);
-            mExoPlayer.setAudioDebugListener(null);
+            mExoPlayer.removeListener(listener);
             mExoPlayer.release();
             mExoPlayer = null;
+
+            mNotifManager.cancelAll();
+            mMediaSession.setActive(false);
         }
     }
 
     private void setupView() {
 
         //initialize Components
-//        listener = new ComponentListener();
+        listener = new ComponentListener();
         mNotifManager = (NotificationManager) fragmentActivity.getSystemService(NOTIFICATION_SERVICE);
 
         //set header text
@@ -187,7 +202,7 @@ public class StepFragment extends BaseFragment {
         //setup video player
         if (mPlayerView != null && videoEmptyState != null) {
             if (TextUtils.isEmpty(currentStep.getVideoURL())) {
-                mPlayerView.setVisibility(View.INVISIBLE);
+                playerLayout.setVisibility(View.INVISIBLE);
                 videoEmptyState.setVisibility(View.VISIBLE);
             } else {
                 initializeMediaSession();
@@ -224,10 +239,11 @@ public class StepFragment extends BaseFragment {
                         PlaybackStateCompat.ACTION_PLAY |
                                 PlaybackStateCompat.ACTION_PAUSE |
                                 PlaybackStateCompat.ACTION_PLAY_PAUSE |
-                                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+                                PlaybackStateCompat.ACTION_FAST_FORWARD |
+                                PlaybackStateCompat.ACTION_REWIND
                 );
         mMediaSession.setPlaybackState(mPlaybackStateBuilder.build());
-        mMediaSession.setCallback(new QuizMediaSessionCallback());
+        mMediaSession.setCallback(new StepMediaSessionCallback());
         mMediaSession.setActive(true);
     }
 
@@ -240,17 +256,15 @@ public class StepFragment extends BaseFragment {
                     new DefaultTrackSelector(adaptiveSelectionFactory),
                     new DefaultLoadControl()
             );
-
-            mPlayerView.setPlayer(mExoPlayer);
-            /*mExoPlayer.addListener(listener);
-            mExoPlayer.setVideoDebugListener(listener);
-            mExoPlayer.setAudioDebugListener(listener);*/
-            mExoPlayer.setPlayWhenReady(playWhenReady);
-            mExoPlayer.seekTo(currentWindow, playbackPosition);
         }
 
         MediaSource mediaSource = buildMediaSource(Uri.parse(currentStep.getVideoURL()));
         mExoPlayer.prepare(mediaSource, true, false);
+
+        mPlayerView.setPlayer(mExoPlayer);
+        mExoPlayer.seekTo(currentWindow, playbackPosition);
+        mExoPlayer.addListener(listener);
+        mExoPlayer.setPlayWhenReady(playWhenReady);
     }
 
     private MediaSource buildMediaSource(@NonNull Uri uri) {
@@ -276,14 +290,10 @@ public class StepFragment extends BaseFragment {
         );
     }
 
-    private void hideFullScreen() {
-    }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
-//        mNotifManager.cancelAll();
-//        mMediaSession.setActive(false);
+        releasePlayer();
     }
 
     private void showNotification(PlaybackStateCompat state) {
@@ -302,18 +312,22 @@ public class StepFragment extends BaseFragment {
         NotificationCompat.Action playPauseAction = new android.support.v4.app.NotificationCompat.Action(icon, play_pause,
                 MediaButtonReceiver.buildMediaButtonPendingIntent(fragmentActivity, PlaybackStateCompat.ACTION_PLAY_PAUSE));
 
-        NotificationCompat.Action restartAction = new android.support.v4.app.NotificationCompat.Action(R.drawable.exo_controls_previous, getString(R.string.restart),
-                MediaButtonReceiver.buildMediaButtonPendingIntent(fragmentActivity, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS));
+        NotificationCompat.Action rewindAction = new android.support.v4.app.NotificationCompat.Action(R.drawable.exo_icon_rewind, getString(R.string.rewind),
+                MediaButtonReceiver.buildMediaButtonPendingIntent(fragmentActivity, PlaybackStateCompat.ACTION_REWIND));
+
+        NotificationCompat.Action fastforwardAction = new android.support.v4.app.NotificationCompat.Action(R.drawable.exo_icon_fastforward, getString(R.string.fastforward),
+                MediaButtonReceiver.buildMediaButtonPendingIntent(fragmentActivity, PlaybackStateCompat.ACTION_FAST_FORWARD));
 
         PendingIntent contentIntent = PendingIntent.getActivity(fragmentActivity, 0,
                 new Intent(fragmentActivity, MealListActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
 
         android.support.v4.app.NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(fragmentActivity, CHANNEL_ID)
-                .setContentText(getString(R.string.notification_text))
+                .setContentText(currentStep.getShortDescription())
                 .setSmallIcon(R.drawable.ic_movie_black)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .addAction(restartAction)
+                .addAction(rewindAction)
                 .addAction(playPauseAction)
+                .addAction(fastforwardAction)
                 .setContentIntent(contentIntent)
                 .setStyle(new android.support.v4.media.app.NotificationCompat.MediaStyle()
                         .setShowActionsInCompactView(0, 1)
@@ -329,7 +343,7 @@ public class StepFragment extends BaseFragment {
         }
     }
 
-    private class QuizMediaSessionCallback extends MediaSessionCompat.Callback {
+    private class StepMediaSessionCallback extends MediaSessionCompat.Callback {
         @Override
         public void onPlay() {
             mExoPlayer.setPlayWhenReady(true);
@@ -341,8 +355,13 @@ public class StepFragment extends BaseFragment {
         }
 
         @Override
-        public void onSkipToPrevious() {
-            mExoPlayer.seekTo(0);
+        public void onRewind() {
+            mExoPlayer.seekTo(mExoPlayer.getContentPosition() - 1);
+        }
+
+        @Override
+        public void onFastForward() {
+            mExoPlayer.seekTo(mExoPlayer.getContentPosition() + 1);
         }
     }
 
@@ -377,8 +396,17 @@ public class StepFragment extends BaseFragment {
                             1f);
                 }
 
+                bufferLoader.setVisibility(View.INVISIBLE);
                 mMediaSession.setPlaybackState(mPlaybackStateBuilder.build());
                 showNotification(mPlaybackStateBuilder.build());
+            } else if (playbackState == Player.STATE_BUFFERING) {
+                if (playWhenReady)
+                    bufferLoader.setVisibility(View.VISIBLE);
+                else
+                    bufferLoader.setVisibility(View.INVISIBLE);
+            } else {
+                bufferLoader.setVisibility(View.INVISIBLE);
+                mNotifManager.cancelAll();
             }
         }
 
