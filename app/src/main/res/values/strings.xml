@@ -21,4 +21,8 @@
     <string name="pause_btn">pause_btn</string>
     <string name="ffwd_btn">ffwd_btn</string>
     <string name="frame_preview">frame_preview</string>
+    <string name="loading">Loading</string>
+    <string name="image_wifi_unavailable">image_wifi_unavailable</string>
+    <string name="poor_connectivity">Poor connectivity</string>
+    <string name="try_again">Try again</string>
 </resources>

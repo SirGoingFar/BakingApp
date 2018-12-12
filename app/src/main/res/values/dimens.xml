@@ -25,4 +25,6 @@
     <dimen name="dimen_1dp">1dp</dimen>
     <dimen name="dimen_100dp">100dp</dimen>
     <dimen name="video_frame_width">2dp</dimen>
+    <dimen name="text_30sp">30sp</dimen>
+    <dimen name="dimen_5dp">5dp</dimen>
 </resources>

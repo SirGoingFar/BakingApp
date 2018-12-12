@@ -3,56 +3,43 @@ package com.eemf.sirgoingfar.bakingapp.utils;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import com.eemf.sirgoingfar.bakingapp.R;
+import com.eemf.sirgoingfar.bakingapp.data.RecipeDataClient;
 import com.eemf.sirgoingfar.bakingapp.models.RecipeData;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.util.List;
+
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class DataUtil {
 
-    private final String DATA_URL = "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
+    private static final String BASE_URL = "https://d17h27t6h515a5.cloudfront.net/";
 
-    private static String parseRecipeData(@NonNull Context context) {
-        InputStream is = context.getResources().openRawResource(R.raw.data_json_file);
-        Writer writer = new StringWriter();
-        char[] buffer = new char[1024];
+    public static void fetchRecipeData(@NonNull Context context) {
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
         try {
-            Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-            int n;
-            while ((n = reader.read(buffer)) != -1) {
-                writer.write(buffer, 0, n);
+
+            Response<List<RecipeData>> recipeDataResponse = retrofit.create(RecipeDataClient.class)
+                    .fetchRecipeData().execute();
+
+            if (recipeDataResponse.isSuccessful()) {
+                Prefs.getsInstance(context).saveRecipeData(recipeDataResponse.body());
             }
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                is.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-                is = null;
-            }
         }
-
-        return writer.toString();
     }
 
     public static List<RecipeData> getMealList(@NonNull Context context) {
-
-        String jsonString = parseRecipeData(context);
-
-        return new Gson().fromJson(jsonString, new TypeToken<List<RecipeData>>(){}.getType());
+        return Prefs.getsInstance(context).getRecipeData();
     }
 
     public static String getMealNameAt(@NonNull Context context, int mealIndex){

@@ -1,6 +1,8 @@
 package com.eemf.sirgoingfar.bakingapp.fragments;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,6 +13,8 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import com.eemf.sirgoingfar.bakingapp.R;
 import com.eemf.sirgoingfar.bakingapp.activities.MealListActivity;
@@ -21,11 +25,18 @@ import com.eemf.sirgoingfar.bakingapp.utils.DataUtil;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class MealListFragment extends BaseFragment implements MealRecyclerViewAdapter.OnMealItemClicked {
 
     @BindView(R.id.rv_meal_list)
     RecyclerView mealRecyclerView;
+
+    @BindView(R.id.rl_data_loading)
+    RelativeLayout dataLoadingView;
+
+    @BindView(R.id.ll_network_connectivity)
+    LinearLayout poorConnectivityView;
 
     MealListActivity fragmentActivity;
 
@@ -49,6 +60,12 @@ public class MealListFragment extends BaseFragment implements MealRecyclerViewAd
         super.onStart();
         fragmentActivity.showOrHideDetailView(false);
         fragmentActivity.setActionBarTitle(fragmentActivity.getString(R.string.app_name));
+
+        //fetch data and setup view
+        if (prefs.isRecipeDataAvailable())
+            setupView();
+        else
+            loadApiData();
     }
 
     @Nullable
@@ -56,11 +73,43 @@ public class MealListFragment extends BaseFragment implements MealRecyclerViewAd
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_meal_list, container, false);
         ButterKnife.bind(this, view);
-        setupView();
         return view;
     }
 
+    @SuppressLint("StaticFieldLeak")
+    private void loadApiData() {
+
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected void onPreExecute() {
+                dataLoadingView.setVisibility(View.VISIBLE);
+                poorConnectivityView.setVisibility(View.GONE);
+            }
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                DataUtil.fetchRecipeData(fragmentActivity);
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                if (prefs.isRecipeDataAvailable())
+                    setupView();
+                else {
+                    poorConnectivityView.setVisibility(View.VISIBLE);
+                    dataLoadingView.setVisibility(View.GONE);
+                }
+            }
+        }.execute();
+    }
+
     private void setupView() {
+
+        //hide other views
+        dataLoadingView.setVisibility(View.GONE);
+        poorConnectivityView.setVisibility(View.GONE);
 
         //setup recyclerview
         mealRecyclerView.setHasFixedSize(true);
@@ -106,8 +155,14 @@ public class MealListFragment extends BaseFragment implements MealRecyclerViewAd
         return noOfColumns;
     }
 
+    @OnClick(R.id.btn_try_again)
+    void retryDataFetch() {
+        loadApiData();
+    }
+
     @Override
     public void onMealItemClicked(int clickedMealPosition) {
         fragmentActivity.startFragmentOnMasterView(MealRecipeIngredientFragment.newInstance(clickedMealPosition), true);
     }
+
 }
