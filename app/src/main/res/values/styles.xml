@@ -10,6 +10,7 @@
 
     <style name="ClickableCard">
         <item name="android:background">@drawable/bg_clickable_card</item>
+        <item name="android:clickable">true</item>
     </style>
 
     <style name="SmallProgress">
