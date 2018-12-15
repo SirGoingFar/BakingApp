@@ -18,7 +18,7 @@ import butterknife.ButterKnife;
 
 public class MealRecipeIngredientFragment extends BaseFragment {
 
-    @BindView(R.id.rv_meal_list)
+    @BindView(R.id.rv_meal_step_ingredient_list)
     RecyclerView ingredientRecipeRecyclerView;
 
     private int mMealIndex;

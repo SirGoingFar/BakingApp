@@ -11,7 +11,6 @@ import android.view.ViewGroup;
 
 import com.eemf.sirgoingfar.bakingapp.R;
 import com.eemf.sirgoingfar.bakingapp.adapters.IngredientAdapter;
-import com.eemf.sirgoingfar.bakingapp.adapters.RecipeIngredientAdapter;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
