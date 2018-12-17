@@ -17,6 +17,7 @@ public class Prefs {
 
     private final String APP_PREFS = "app_prefs";
     private final String PREF_RECIPE_DATA = "pref_recipe_data";
+    private static final String PREFS_LAST_CLICKED_MEAL_INDEX = "last_clicked_meal_index";
 
     private SharedPreferences mPrefs;
     @SuppressLint("StaticFieldLeak")
@@ -68,5 +69,13 @@ public class Prefs {
 
     public boolean isRecipeDataAvailable() {
         return getRecipeDatajsonString() != null;
+    }
+
+    public void setLastClickedIngredient(int mealIndex) {
+        getEditor().putInt(PREFS_LAST_CLICKED_MEAL_INDEX, mealIndex).apply();
+    }
+
+    public int getLastClickedIngredient() {
+        return mPrefs.getInt(PREFS_LAST_CLICKED_MEAL_INDEX, -1);
     }
 }
