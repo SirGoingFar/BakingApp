@@ -25,4 +25,7 @@
     <string name="image_wifi_unavailable">image_wifi_unavailable</string>
     <string name="poor_connectivity">Poor connectivity</string>
     <string name="try_again">Try again</string>
+    <string name="add_widget">Add widget</string>
+    <string name="no_ingredient_prompt">No ingredient available</string>
+    <string name="widget_header_text"><xliff:g id="header_text" example="Nutella Pie">%s </xliff:g>Ingredients</string>
 </resources>

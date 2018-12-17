@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_ingredient_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/dimen_6dp"
+        android:layout_marginEnd="@dimen/dimen_12dp"
+        android:layout_marginLeft="@dimen/dimen_12dp"
+        android:layout_marginRight="@dimen/dimen_12dp"
+        android:layout_marginStart="@dimen/dimen_12dp"
+        android:layout_marginTop="@dimen/dimen_6dp"
+        android:gravity="start"
+        android:lineSpacingExtra="@dimen/dimen_6dp"
+        android:textColor="@color/colorAccent"
+        android:textSize="@dimen/text_20sp"
+        android:textStyle="bold"
+        tools:text="Green" />
+
+    <TextView
+        android:id="@+id/tv_ingredient_measure"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/dimen_12dp"
+        android:layout_marginEnd="@dimen/dimen_12dp"
+        android:layout_marginLeft="@dimen/dimen_12dp"
+        android:layout_marginRight="@dimen/dimen_12dp"
+        android:layout_marginStart="@dimen/dimen_12dp"
+        android:layout_marginTop="0dp"
+        android:text="@string/ingredient_measurement"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="@dimen/text_14sp" />
+
+</LinearLayout>

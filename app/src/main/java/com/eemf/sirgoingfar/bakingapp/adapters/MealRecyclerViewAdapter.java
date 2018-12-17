@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.eemf.sirgoingfar.bakingapp.R;
 import com.eemf.sirgoingfar.bakingapp.models.RecipeData;
+import com.eemf.sirgoingfar.bakingapp.utils.Prefs;
 
 import java.util.List;
 
@@ -89,6 +90,8 @@ public class MealRecyclerViewAdapter extends RecyclerView.Adapter<MealRecyclerVi
             switch (view.getId()){
                 case R.id.container:
                     listener.onMealItemClicked(getAdapterPosition());
+                    //update last clicked meal index
+                    Prefs.getsInstance(context).setLastClickedIngredient(getAdapterPosition());
                     break;
             }
         }
