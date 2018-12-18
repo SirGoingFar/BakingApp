@@ -62,8 +62,10 @@ public class RecipeIngredientAdapter extends RecyclerView.Adapter<RecipeIngredie
 
         if (position == 0)
             holder.desc.setText(mIngredientList.size() <= 1 ? mContext.getString(R.string.singular_ingredient) : mContext.getString(R.string.plural_ingredient));
+        else if (position == 1)
+            holder.desc.setText(currentStep.getShortDescription());
         else
-            holder.desc.setText(mContext.getString(R.string.step_label_text, String.valueOf(holder.getAdapterPosition()), currentStep.getShortDescription()));
+            holder.desc.setText(mContext.getString(R.string.step_label_text, String.valueOf((holder.getAdapterPosition() - 1)), currentStep.getShortDescription()));
     }
 
     @Override
