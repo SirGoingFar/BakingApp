@@ -197,7 +197,7 @@ public class StepFragment extends BaseFragment {
 
         //set header text
         if (headerText != null)
-            headerText.setText(fragmentActivity.getString(R.string.step, String.valueOf(stepNumber)));
+            headerText.setText(fragmentActivity.getString(R.string.step, String.valueOf(stepNumber - 1)));
 
         //setup video player
         if (mPlayerView != null && videoEmptyState != null) {
